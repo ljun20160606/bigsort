@@ -20,10 +20,10 @@ func genUrls(num int) []string {
 }
 
 const (
-	// kilobyte equal to 1024b
-	kilobyte = 1024
-	// megaByte equal to 1024kb
-	megabyte = 1024 * kilobyte
+	// Kilobyte equal to 1024b
+	Kilobyte = 1024
+	// MegaByte equal to 1024kb
+	Megabyte = 1024 * Kilobyte
 )
 
 type TopRecord struct {
@@ -61,7 +61,7 @@ func genAndRecord(topNum int, cap int, output io.Writer) *TopRecord {
 		// Init Url
 		urlCounters[i].Url = urls[i]
 	}
-	capLimit := cap * megabyte
+	capLimit := cap * Megabyte
 	// Number of Bytes
 	var size int
 	for {
@@ -92,8 +92,16 @@ func (c *Checkpoint) MockDataPath() string {
 	return buildMockFilePath(c.CurrentStep)
 }
 
+func (c *Checkpoint) MockKey() string {
+	return buildMockKey(c.CurrentStep)
+}
+
 func buildMockFilePath(step int) string {
-	return "mock-" + strconv.Itoa(step) + ".txt"
+	return buildMockKey(step) + ".txt"
+}
+
+func buildMockKey(step int) string {
+	return "mock-" + strconv.Itoa(step)
 }
 
 func ReadCheckPoint() *Checkpoint {
