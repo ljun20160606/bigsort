@@ -22,6 +22,6 @@ func TestGenAndRecord(t *testing.T) {
 	ast.True(len(counters) == rankNum)
 }
 
-func TestGenMockData(t *testing.T) {
-	GenMockData(10, 1)
-}
+//func TestGenMockData(t *testing.T) {
+//	GenMockData(10, 1)
+//}

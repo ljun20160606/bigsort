@@ -21,3 +21,8 @@
 .DS_Store
 .vscode
 coverage.txt
+
+# bigsort
+/split-*
+/checkpoint.json
+/mock-*
