@@ -27,10 +27,10 @@ const (
 )
 
 type TopRecord struct {
-	Step     int          `json:"step"`
-	Top      int          `json:"top"`
-	Capacity int          `json:"capacity"`
-	Sorted   []UrlCounter `json:"sorted"`
+	Step     int           `json:"step"`
+	Top      int           `json:"top"`
+	Capacity int           `json:"capacity"`
+	Sorted   []*UrlCounter `json:"sorted"`
 }
 
 // A UrlCounter will store UrlCounter{10, http://1.com/} if has 10 http://1.com/
@@ -41,7 +41,7 @@ type UrlCounter struct {
 	Url string `json:"url"`
 }
 
-type UrlCounterSorter []UrlCounter
+type UrlCounterSorter []*UrlCounter
 
 func (u UrlCounterSorter) Len() int           { return len(u) }
 func (u UrlCounterSorter) Swap(i, j int)      { u[i], u[j] = u[j], u[i] }
@@ -56,17 +56,17 @@ func genAndRecord(topNum int, cap int, output io.Writer) *TopRecord {
 	topLimit := topNum * 100
 	urls := genUrls(topLimit)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	urlCounters := make([]UrlCounter, topLimit)
+	urlCounters := make([]*UrlCounter, topLimit)
 	for i := range urlCounters {
 		// Init Url
-		urlCounters[i].Url = urls[i]
+		urlCounters[i] = &UrlCounter{Url: urls[i]}
 	}
 	capLimit := cap * Megabyte
 	// Number of Bytes
 	var size int
 	for {
 		index := r.Intn(topLimit)
-		counterPtr := &urlCounters[index]
+		counterPtr := urlCounters[index]
 		urlBytes := append([]byte(counterPtr.Url), '\n')
 		size += len(urlBytes)
 		if size > capLimit {

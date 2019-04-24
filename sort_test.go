@@ -1,25 +1,25 @@
 package bigsort
 
 import (
-	"fmt"
-	"github.com/ljun20160606/bigsort/mock"
-	"github.com/ljun20160606/gox/fs"
-	"io"
+	"bytes"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestName(t *testing.T) {
-	mock.GenMockData(10, 10)
-}
+func TestReadTopK(t *testing.T) {
+	ast := assert.New(t)
 
-func TestHashSplit(t *testing.T) {
-	checkPoint := mock.ReadCheckPoint()
-	_ = fs.ReadFile(checkPoint.MockDataPath(), func(reader io.Reader) error {
-		prefix := "split-" + checkPoint.MockKey() + "/"
-		err := hashSplit(reader, &SplitConfig{1, 10, PrefixSolver(prefix)})
-		if err != nil {
-			fmt.Println(err)
-		}
-		return nil
-	})
+	reader := bytes.NewReader([]byte(`http://339.com/
+http://339.com/
+http://339.com/
+http://429.com/
+http://429.com/
+http://475.com/
+http://98.com/
+http://806.com/`))
+	counters, _ := readTopK(reader, 10)
+
+	ast.Equal(5, len(counters))
+	ast.Equal("http://339.com/", counters[0].Url)
+	ast.Equal("http://429.com/", counters[1].Url)
 }
