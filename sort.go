@@ -49,4 +49,3 @@ func ReadTopK(k int, rs ...io.ReadCloser) ([]*mock.UrlCounter, error) {
 	}
 	return container[:k], nil
 }
-
