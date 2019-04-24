@@ -17,7 +17,7 @@ http://429.com/
 http://475.com/
 http://98.com/
 http://806.com/`))
-	counters, _ := readTopK(reader, 10)
+	counters, _ := ReadTopK(10, reader)
 
 	ast.Equal(5, len(counters))
 	ast.Equal("http://339.com/", counters[0].Url)

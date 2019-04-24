@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -27,10 +28,10 @@ const (
 )
 
 type TopRecord struct {
-	Step     int           `json:"step"`
-	Top      int           `json:"top"`
-	Capacity int           `json:"capacity"`
-	Sorted   []*UrlCounter `json:"sorted"`
+	Step   int           `json:"step"`
+	Top    int           `json:"top"`
+	Size   int           `json:"size"`
+	Sorted []*UrlCounter `json:"sorted"`
 }
 
 // A UrlCounter will store UrlCounter{10, http://1.com/} if has 10 http://1.com/
@@ -51,8 +52,8 @@ func (u UrlCounterSorter) Less(i, j int) bool { return u[i].Num > u[j].Num }
 // For getting a batch of discrete urls, generating 100 * topNum urls,
 // then random select a url append to output
 // topNum is number of expected rank
-// cap is number of expected using max capacity, value is in MB
-func genAndRecord(topNum int, cap int, output io.Writer) *TopRecord {
+// fileSize is number of expected using max size, value is in MB
+func genAndRecord(topNum int, fileSize int, output io.Writer) *TopRecord {
 	topLimit := topNum * 100
 	urls := genUrls(topLimit)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -61,7 +62,7 @@ func genAndRecord(topNum int, cap int, output io.Writer) *TopRecord {
 		// Init Url
 		urlCounters[i] = &UrlCounter{Url: urls[i]}
 	}
-	capLimit := cap * Megabyte
+	capLimit := fileSize * Megabyte
 	// Number of Bytes
 	var size int
 	for {
@@ -77,9 +78,9 @@ func genAndRecord(topNum int, cap int, output io.Writer) *TopRecord {
 	}
 	sort.Sort(UrlCounterSorter(urlCounters))
 	return &TopRecord{
-		Top:      topLimit,
-		Capacity: cap,
-		Sorted:   urlCounters[:topNum],
+		Top:    topLimit,
+		Size:   fileSize,
+		Sorted: urlCounters[:topNum],
 	}
 }
 
@@ -104,30 +105,37 @@ func buildMockKey(step int) string {
 	return "mock-" + strconv.Itoa(step)
 }
 
-func ReadCheckPoint() *Checkpoint {
+func ReadCheckPoint() (*Checkpoint, error) {
 	checkpoint := new(Checkpoint)
-	err := fs.ReadJSON(checkpointPath, checkpoint)
+	err := fs.ReadJSON(CheckpointPath, checkpoint)
 	if err != nil {
-		log.Println(checkpointPath + " is not found")
+		log.Println(CheckpointPath + " is not found")
 	}
-	return checkpoint
+	return checkpoint, err
 }
 
 func writeCheckPoint(checkpoint *Checkpoint) {
-	_ = fs.WriteJSON(checkpointPath, checkpoint)
+	_ = fs.WriteJSON(CheckpointPath, checkpoint)
 }
 
-const checkpointPath = "checkpoint.json"
+const CheckpointPath = "checkpoint.json"
 
-func GenMockData(topNum int, cap int) {
-	checkpoint := ReadCheckPoint()
+func GenMockData(topNum int, size int) *Checkpoint {
+	checkpoint, _ := ReadCheckPoint()
 	nextStep := checkpoint.CurrentStep + 1
 	_ = fs.WriteFile(buildMockFilePath(nextStep), func(writer io.Writer) error {
-		record := genAndRecord(topNum, cap, writer)
+		record := genAndRecord(topNum, size, writer)
 		record.Step = nextStep
 		checkpoint.TopRecords = append(checkpoint.TopRecords, record)
 		return nil
 	})
 	checkpoint.CurrentStep = nextStep
 	writeCheckPoint(checkpoint)
+	return checkpoint
+}
+
+func IndexEqual(path1, path2 string) bool {
+	prefix1 := strings.SplitN(path1, "-", 2)[0]
+	prefix2 := strings.SplitN(path2, "-", 2)[0]
+	return prefix1 == prefix2
 }
