@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -135,7 +136,9 @@ func GenMockData(topNum int, size int) *Checkpoint {
 }
 
 func IndexEqual(path1, path2 string) bool {
-	prefix1 := strings.SplitN(path1, "-", 2)[0]
-	prefix2 := strings.SplitN(path2, "-", 2)[0]
+	_, file1 := filepath.Split(path1)
+	_, file2 := filepath.Split(path2)
+	prefix1 := strings.SplitN(file1, "-", 2)[0]
+	prefix2 := strings.SplitN(file2, "-", 2)[0]
 	return prefix1 == prefix2
 }

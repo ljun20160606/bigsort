@@ -44,17 +44,17 @@ func computeSplitData(prefix string, topNum int) ([]*mock.UrlCounter, error) {
 		if prefix == path {
 			return nil
 		}
-		if len(stack) == 0 {
-			stack = append(stack, path)
-			return nil
-		}
-		// Same index
-		if mock.IndexEqual(stack[len(stack)-1], path) {
+		if len(stack) == 0 ||
+			mock.IndexEqual(stack[len(stack)-1], path) {
 			stack = append(stack, path)
 			return nil
 		}
 
-		return readTopKFromFile(topNum, globalCounters, stack)
+		err = readTopKFromFile(topNum, globalCounters, stack)
+		// clear stack
+		stack = stack[:0]
+		stack = append(stack, path)
+		return err
 	})
 
 	if err != nil {
@@ -85,8 +85,6 @@ func readTopKFromFile(topNum int, globalCounters map[string]*mock.UrlCounter, st
 		}
 		rs = append(rs, file)
 	}
-	// clear stack
-	stack = stack[:0]
 
 	counters, err := bigsort.ReadTopK(topNum, rs...)
 	if err != nil {
