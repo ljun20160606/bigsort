@@ -3,6 +3,7 @@ package bigsort
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
 )
 
@@ -17,7 +18,7 @@ http://429.com/
 http://475.com/
 http://98.com/
 http://806.com/`))
-	counters, _ := ReadTopK(10, reader)
+	counters, _ := ReadTopK(10, ioutil.NopCloser(reader))
 
 	ast.Equal(5, len(counters))
 	ast.Equal("http://339.com/", counters[0].Url)
