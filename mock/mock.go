@@ -79,7 +79,7 @@ func genAndRecord(topNum int, fileSize int, output io.Writer) *TopRecord {
 	}
 	sort.Sort(UrlCounterSorter(urlCounters))
 	return &TopRecord{
-		Top:    topLimit,
+		Top:    topNum,
 		Size:   fileSize,
 		Sorted: urlCounters[:topNum],
 	}
