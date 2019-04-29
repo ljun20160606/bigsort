@@ -48,6 +48,15 @@ type UrlCounterSorter []*UrlCounter
 func (u UrlCounterSorter) Len() int           { return len(u) }
 func (u UrlCounterSorter) Swap(i, j int)      { u[i], u[j] = u[j], u[i] }
 func (u UrlCounterSorter) Less(i, j int) bool { return u[i].Num > u[j].Num }
+func (u *UrlCounterSorter) Push(x interface{}) {
+	*u = append(*u, x.(*UrlCounter))
+}
+func (u *UrlCounterSorter) Pop() interface{} {
+	i := u.Len()
+	p := (*u)[i-1]
+	*u = (*u)[:i-1]
+	return p
+}
 
 // genAndRecord is a method that generates TopRecord
 // For getting a batch of discrete urls, generating 100 * topNum urls,

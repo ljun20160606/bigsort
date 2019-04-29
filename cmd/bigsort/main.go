@@ -6,7 +6,6 @@ import (
 	"github.com/ljun20160606/bigsort/mock"
 	"github.com/spf13/cobra"
 	"log"
-	"sort"
 	"strconv"
 )
 
@@ -50,9 +49,7 @@ func computeFunc(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	sort.Sort(mock.UrlCounterSorter(result))
-
-	bytes, _ := json.Marshal(result[:topNum])
+	bytes, _ := json.Marshal(result)
 	log.Println("Get result")
 	log.Println(string(bytes))
 	log.Println("Checkpoint")

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"github.com/ljun20160606/bigsort"
 	"github.com/ljun20160606/bigsort/mock"
 	"github.com/ljun20160606/gox/fs"
@@ -68,11 +69,18 @@ func computeSplitData(prefix string, topNum int) ([]*mock.UrlCounter, error) {
 		}
 	}
 
-	result := make([]*mock.UrlCounter, 0, len(globalCounters))
+	counterHeap := new(mock.UrlCounterSorter)
 	for key := range globalCounters {
 		counter := globalCounters[key]
-		result = append(result, counter)
+		heap.Push(counterHeap, counter)
 	}
+
+	result := make([]*mock.UrlCounter, 0, topNum)
+
+	for i := 0; i < topNum; i++ {
+		result = append(result, heap.Pop(counterHeap).(*mock.UrlCounter))
+	}
+
 	return result, nil
 }
 
